@@ -58,23 +58,23 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&Book{})
 }
 
-// Update Book @todo - fix; only deletes the item
-// func updateBook(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	params := mux.Vars(r)
-// 	for index, item := range books {
-// 		if item.ID == params["id"] {
-// 			books = append(books[:index], books[index+1:]...) // Delete syntax
-// 			var book Book
-// 			_ = json.NewDecoder(r.Body).Decode(&book)
-// 			book.ID = params["id"]
-// 			books = append(books, book)
-// 			json.NewEncoder(w).Encode(book)
-// 			return
-// 		}
+//Update Book @todo - fix; only deletes the item
+func updateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range books {
+		if item.ID == params["id"] {
+			books = append(books[:index], books[index+1:]...) // Delete syntax
+			var book Book
+			_ = json.NewDecoder(r.Body).Decode(&book)
+			book.ID = params["id"]
+			books = append(books, book)
+			json.NewEncoder(w).Encode(book)
+			return
+		}
 
-// 	}
-// }
+	}
+}
 
 // Delete Book
 func deleteBook(w http.ResponseWriter, r *http.Request) {
