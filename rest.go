@@ -64,12 +64,17 @@ func updateBook(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	for index, item := range books {
 		if item.ID == params["id"] {
+			done := make(chan bool)
+			go func() {
+				var book Book
+				_ = json.NewDecoder(r.Body).Decode(&book)
+				book.ID = params["id"]
+				books = append(books, book)
+				json.NewEncoder(w).Encode(book)
+				done <- true
+			}()
+			<-done
 			books = append(books[:index], books[index+1:]...) // Delete syntax
-			var book Book
-			_ = json.NewDecoder(r.Body).Decode(&book)
-			book.ID = params["id"]
-			books = append(books, book)
-			json.NewEncoder(w).Encode(book)
 			return
 		}
 
@@ -105,10 +110,10 @@ func main() {
 
 	// Route Handlers / Endpoints
 	r.HandleFunc("/", homePage)
-	r.HandleFunc("/api/books", getBooks).Methods("GET")     // Index
-	r.HandleFunc("/api/books/{id}", getBook).Methods("GET") // Show
-	r.HandleFunc("/api/books", createBook).Methods("POST")  // Create
-	// r.HandleFunc("/api/books/{id}", updateBook).Methods("PUT")    // Update
+	r.HandleFunc("/api/books", getBooks).Methods("GET")           // Index
+	r.HandleFunc("/api/books/{id}", getBook).Methods("GET")       // Show
+	r.HandleFunc("/api/books", createBook).Methods("POST")        // Create
+	r.HandleFunc("/api/books/{id}", updateBook).Methods("PUT")    // Update
 	r.HandleFunc("/api/books/{id}", deleteBook).Methods("DELETE") // Delete
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
